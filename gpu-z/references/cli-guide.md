@@ -67,17 +67,46 @@ Use `-dump` when you need to verify hardware identity, driver versions, or PCIe 
 
 `-log` launches GPU-Z and writes sensor readings to a text file every second. **Stops when GPU-Z is closed** or "Log to file" is unchecked in the GUI.
 
+### ⚠️ Process Lifecycle Rules (MUST Follow)
+
+The GPU-Z `-log` process is **conversation-scoped**. You MUST obey these two rules:
+
+| Rule | Requirement |
+|------|-------------|
+| **Single process** | At most ONE GPU-Z `-log` instance per conversation. Before starting a new `-log`, always check for and kill any existing GPU-Z process first. |
+| **Kill on done** | When the monitoring goal is met, the user signals they are finished, or the conversation is wrapping up — you MUST kill the GPU-Z process. Never leave it running past the conversation end. |
+
+### Pre-Launch Check (Always Run First)
+
 ```bash
-# Start logging minimized (runs in background)
-powershell.exe "& '<gpuz_path>\GPU-Z.exe' -minimized -log '$SENSOR_INFO'"
+# Check if GPU-Z is already running BEFORE launching -log
+tasklist 2>/dev/null | grep -i "GPU-Z" && echo "GPU-Z IS RUNNING — kill it first" || echo "No GPU-Z running"
 ```
 
 ```bash
-# Stop logging
+# Kill any existing GPU-Z before starting a new log session
 powershell.exe "Start-Process -Verb RunAs taskkill '/f /im GPU-Z.exe'"
 ```
 
-> **Important:** `<sensor_info>` starts recording the moment the `-log` command runs and **keeps appending indefinitely** — it never stops on its own. After you have captured a long enough window of data, you **must** stop it with the command above.
+If GPU-Z was running, kill it, wait 1 second, then proceed.
+
+### Start Logging
+
+> **Note:** Use `Start-Process` (not `&` call operator) to launch GPU-Z as an independent process that survives the PowerShell session.
+
+```bash
+# Start logging minimized (runs in background)
+powershell.exe "Start-Process '<gpuz_path>\GPU-Z.exe' -ArgumentList '-minimized', '-log', '<cwd>\sensor_info.csv'"
+```
+
+### Stop Logging (Kill Process)
+
+```bash
+# Stop logging — GPU-Z process terminates immediately
+powershell.exe "Start-Process -Verb RunAs taskkill '/f /im GPU-Z.exe'"
+```
+
+> **Important:** The log file starts recording the moment `-log` runs and **keeps appending indefinitely** — it never stops on its own. You **must** kill the process when done. At conversation end, verify no GPU-Z remains with `tasklist | grep GPU-Z`.
 
 The output is a CSV with these columns (varies by GPU):
 
