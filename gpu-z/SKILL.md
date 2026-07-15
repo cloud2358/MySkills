@@ -1,40 +1,82 @@
 ---
-
-## name: gpu-z
+name: gpu-z
 description: Use GPU-Z to capture GPU hardware specs and real-time sensor data. Trigger when the user wants to monitor GPU performance, capture GPU sensor data, diagnose GPU bottlenecks, learn how to use GPU-Z, or know anything about GPU-Z.
+---
 
 # Introduction
 
-TechPowerUp GPU-Z is a free tool that shows detailed information about video cards and GPUs, such as clocks, memory, BIOS and more. It supports NVIDIA, AMD, ATI and Intel graphics devices. Official website: [https://www.techpowerup.com/gpuz/](https://www.techpowerup.com/gpuz/)
+TechPowerUp GPU-Z is a windows tool that shows detailed information about video cards and GPUs, such as clocks, memory, BIOS and more. It supports NVIDIA, AMD, ATI and Intel graphics devices.
 
-GPU-Z supports Windows 11 / Windows 10 / Windows 8 / Windows 7 / Vista / Windows XP (both 32 and 64 bit versions are supported).
+Official website: [https://www.techpowerup.com/gpuz/](https://www.techpowerup.com/gpuz/)
 
-# Download
+# Scripts
 
-Official website download: [https://www.techpowerup.com/download/techpowerup-gpu-z/](https://www.techpowerup.com/download/techpowerup-gpu-z/)
+## Find GPU-Z
 
-Download the latest **Standard Version** (`GPU-Z.<version>.exe`) from the page above. GPU-Z is portable — run the `.exe` directly with no installation required. 
+Locate an existing GPU-Z installation:
+
+```bash
+cd skills/gpu-z
+python scripts/find_gpuz.py
+```
+
+## Download & Install GPU-Z
+
+If GPU-Z is missing, download it with winget and install it silently:
+
+```bash
+cd skills/gpu-z
+python scripts/download_gpuz.py
+```
+
+## Get hardware specs
+
+Export all GPU hardware specifications to `info/gpu_info.xml`:
+
+```bash
+cd skills/gpu-z
+python scripts/dump_cards.py
+```
+
+## Get sensors data
+
+Record sensors for the default 60 seconds, replacing any existing sensor log:
+
+```bash
+cd skills/gpu-z
+python scripts/log_sensors.py
+```
+
+Set the recording duration with `-t` or `--time`:
+
+```bash
+cd skills/gpu-z
+python scripts/log_sensors.py -t 30
+python scripts/log_sensors.py --time 120
+```
+
+Append new samples to the existing sensor log:
+
+```bash
+cd skills/gpu-z
+python scripts/log_sensors.py -a
+python scripts/log_sensors.py --append
+```
+
+Sensor logs are written to `info/sensors_info.csv`.
+
+> The number passed to `-t` or `--time` controls how long the GPU-Z process runs from startup to termination, **NOT** the exact sensor sampling time. GPU-Z needs several seconds to initialize before collecting data, so the real recording time is slightly shorter. Avoid using a very small value, which may end before the CSV is created or contains valid sensor data.
 
 # Usage
 
-GPU-Z can be driven two ways. For **capturing data**, default to the CLI — it is headless, scriptable, and needs no user interaction. Use the GUI guide when the task centers on the on-screen window or on **teaching the user** how GPU-Z works.
+- Whenever this skill is invoked, first run `python scripts/find_gpuz.py`. If GPU-Z is not found, state that clearly and tell the user that you can help install it.
+- If the user accepts the Agent's offer to help install GPU-Z or directly asks the Agent to install it, run `python scripts/download_gpuz.py`.
+- When the user wants to understand GPU performance, run both `python scripts/dump_cards.py` and `python scripts/log_sensors.py`. Read `info/gpu_info.xml` and `info/sensors_info.csv`, analyze the GPU's operating state, and use [references/perfcap-codes.md](references/perfcap-codes.md) to identify performance bottlenecks.
+- The Agent may freely select and combine the `log_sensors.py` command-line parameters without requesting user approval.
 
-## GPU-Z CLI Guide
+# Further Information
 
-Read [references/cli-guide.md](references/cli-guide.md) **before running any GPU-Z command**. This is the default path for almost every task. Use it when the user wants to:
+Read these references only when the user wants to explore the corresponding GPU-Z details. Do not read them for routine installation, hardware capture, sensor logging, or performance analysis:
 
-- capture **static hardware specs** (GPU model, BIOS/driver version, VRAM, PCIe link);
-- get **real-time GPU performance data** (clocks, temps, load, power);
-- diagnose GPU bottlenecks / throttling.
-
-
-
-## GPU-Z GUI Guide
-
-Read [references/gui-guide.md](references/gui-guide.md) when the task centers on the **on-screen window** or on **teaching the user**. Use it when the user:
-
-- wants to **interpret the meaning of fields/parameters** shown in the GUI (including reading a GPU-Z screenshot they share);
-- wants to be **guided through learning / using GPU-Z** — what each tab, sensor, or the settings page is for;
-- explicitly asks to **open / launch the GPU-Z window**.
-
-Do **not** launch the GUI just to collect data — use CLI instead.
+- Read [references/cli-guide.md](references/cli-guide.md) when the user wants an in-depth understanding of GPU-Z command-line parameters and behavior.
+- Read [references/gui-guide.md](references/gui-guide.md) when the user wants an in-depth understanding of the GPU-Z window, tabs, fields, sensors, validation, or settings.

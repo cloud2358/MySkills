@@ -8,6 +8,14 @@
 gpu-z/
 ├── SKILL.md                    # 技能入口：简介、下载、使用时机分流
 ├── README.md                   # 本文件
+├── scripts/
+│   ├── find_gpuz.py            # 定位 GPU-Z
+│   ├── download_gpuz.py        # 下载并安装 GPU-Z
+│   ├── dump_cards.py           # 导出硬件规格 XML
+│   └── log_sensors.py          # 定时记录传感器 CSV
+├── info/
+│   ├── gpu_info.xml            # 静态硬件规格
+│   └── sensors_info.csv        # 实时传感器数据
 └── references/
     ├── cli-guide.md            # 命令行指南（默认路径）
     ├── gui-guide.md            # 图形界面指南（4 个 Tab + 设置页）
@@ -16,10 +24,22 @@ gpu-z/
 
 ## 安装
 
-1. 从官方页面下载最新 **Standard Version**：<https://www.techpowerup.com/download/techpowerup-gpu-z/>
-2. 直接运行下载得到的 `GPU-Z.<version>.exe` 即可。
+```bash
+python scripts/find_gpuz.py
+python scripts/download_gpuz.py
+```
+
+也可从官方页面下载最新 **Standard Version**：<https://www.techpowerup.com/download/techpowerup-gpu-z/>，将 `GPU-Z.exe` 放到 `C:\Program Files\GPU-Z\` 或本 skill 目录下。
 
 将本 Skill 目录放到你的 skills 目录下（例如 `~/.claude/skills/gpu-z/` 或 `.cursor/skills/gpu-z/`），Agent 即可发现并使用。
+
+### 脚本（推荐）
+
+```bash
+python scripts/dump_cards.py              # → info/gpu_info.xml
+python scripts/log_sensors.py             # → info/sensors_info.csv（默认 60 秒）
+python scripts/log_sensors.py --time 120  # 记录 120 秒
+```
 
 ### 命令行
 

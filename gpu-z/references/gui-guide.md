@@ -1,93 +1,72 @@
 # GPU-Z GUI Guide
 
-This is a manual for Agent to understand the GPU-Z window — what each tab shows and where to click. Use it to **interpret the meaning of on-screen fields/parameters** (e.g. reading a screenshot the user shares) and to **guide the user through learning and using GPU-Z**, as well as when the user interacts with the GUI directly (launch without `-minimized`).
+GPU-Z presents graphics adapter identity, live sensors, API capabilities, and validation information through a tabbed Windows interface.
 
-Launch the full window with:
-
-```bash
-powershell.exe "& '<gpuz_path>\GPU-Z.exe'"
-```
-
-> **Note:** you **dont** need to run this command to open the window. Only launch the GUI when the user explicitly asks to do so.
-
-The window has **four tabs** — `Graphics Card`, `Sensors`, `Advanced`, `Validation` — plus a **settings page** reached from the title-bar menu. A GPU selector dropdown sits at the **bottom-left** of every tab; on multi-GPU systems, switch cards there.
+The main window has four tabs: `Graphics Card`, `Sensors`, `Advanced`, and `Validation`. A GPU selector at the bottom of the window determines which adapter is displayed on multi-GPU systems. The title-bar menu opens GPU-Z settings.
 
 ## Tab 1 — Graphics Card
 
-The GPU's "identity card": **static** hardware facts that do not change while running. Sourced directly from GPU firmware and PCIe configuration space, so this is the most reliable tab.
+The Graphics Card tab summarizes relatively static adapter information assembled from the detected hardware, VBIOS, graphics driver, and Windows.
 
-Key fields:
+Key fields include:
 
-- **Name** — the GPU model, with a `Lookup` button that opens the TechPowerUp GPU database page.
-- **GPU / Revision** — the chip codename (e.g. `AD104`) and revision.
-- **Technology / Die Size** — manufacturing process (nm) and die area.
-- **Release Date / Transistors**.
-- **BIOS Version** — with an adjacent icon to **save (back up) the graphics BIOS** to a `.rom` file. Back up the stock BIOS before any BIOS mod/overclock.
-- **Device ID / Subvendor**.
-- **Bus Interface** — PCIe link (e.g. `PCIe x16 4.0`), showing current vs. maximum negotiated speed.
-- **Shaders / TMUs / ROPs**.
-- **Memory Type / Size / Bus Width / Bandwidth** — e.g. `GDDR6X`, `12 GB`, `192 bit`.
-- **Driver Version / Driver Date** — the installed driver; compare against the vendor site to decide if an update is needed.
-- **GPU Clock / Memory Clock / Boost** — the **default/rated** clocks (live clocks live on the Sensors tab).
-- **Computing** — supported compute APIs: `OpenCL`, `CUDA`, `PhysX`, `DirectCompute`, `Vulkan`, `Ray Tracing`.
+- **Name** — detected GPU model, with a `Lookup` button that opens the corresponding TechPowerUp GPU database page.
+- **GPU / Revision** — GPU codename and silicon revision.
+- **Technology / Die Size** — manufacturing process and die area when known.
+- **Release Date / Transistors** — reference specifications when available.
+- **BIOS Version** — detected VBIOS version; the adjacent icon can save a copy of the VBIOS on supported cards.
+- **Device ID / Subvendor** — PCI device identity and board vendor.
+- **Bus Interface** — supported and currently negotiated PCIe link information. The adjacent render test can place load on the GPU so the active link state can be observed.
+- **Shaders / TMUs / ROPs** — detected processing-resource counts.
+- **Memory Type / Size / Bus Width / Bandwidth** — detected video-memory characteristics.
+- **Driver Version / Driver Date** — metadata for the installed graphics driver.
+- **GPU Clock / Memory Clock / Boost** — reported default and boost clock specifications; live clocks are shown on the Sensors tab.
+- **Computing** — support indicators such as OpenCL, CUDA, DirectCompute, and DirectML, depending on the GPU and driver.
+- **Technologies** — support indicators such as Vulkan, Ray Tracing, PhysX, and OpenGL, depending on the GPU and driver.
 
-Hovering over any field box shows a tooltip describing it.
+Available fields vary by GPU vendor, architecture, driver, and GPU-Z version. Hovering over many fields displays an explanatory tooltip.
 
 ## Tab 2 — Sensors
 
-**Live, real-time** readings, updated ~once per second. This is the tab that matters for performance troubleshooting and monitoring under load. Each row is *Name → numeric value → a small graph*.
+The Sensors tab displays live readings as numeric values and small history graphs. The default refresh interval is approximately one second and can be changed in sensor settings. Available sensors depend on the GPU, driver, and monitoring hardware.
 
-Common sensors (varies by GPU/vendor):
+Common sensors include:
 
-- **GPU Clock / Memory Clock** — actual live clocks.
-- **GPU Temperature** — core temperature. Often the single most-watched value.
-- **Hot Spot / Memory Junction Temperature** — hottest on-die sensor / VRAM temp.
-- **Fan Speed** — in `%` and/or `RPM`.
-- **GPU Load** — core utilization %. Should sit near 95–100% when a game is GPU-bound; a persistently low value under load points to a bottleneck elsewhere.
-- **Memory Controller Load / Bus Interface Load** — VRAM controller activity / PCIe bandwidth utilization.
-- **Board Power Draw / GPU Chip Power Draw** — total board power vs. GPU-package-only power.
-- **GPU Voltage (VDDC)**.
-- **PerfCap Reason** — why the GPU is throttling (power / thermal / voltage / idle). The key field for diagnosing bottlenecks; see [perfcap-codes.md](perfcap-codes.md).
+- **GPU Clock / Memory Clock** — current operating clocks.
+- **GPU Temperature** — reported core temperature.
+- **Hot Spot / Memory Junction Temperature** — hottest reported die sensor or memory-junction temperature when supported.
+- **Fan Speed** — fan duty percentage and/or RPM when exposed by the card.
+- **GPU Load** — reported graphics-engine utilization. Values near 100% are common in GPU-bound uncapped workloads; frame limits, VSync, workload variation, CPU limits, and other constraints can produce lower values.
+- **Memory Controller Load / Bus Interface Load** — memory-controller and PCIe activity.
+- **Board Power Draw / GPU Chip Power Draw** — board-level or GPU-package power measurements when supported.
+- **GPU Voltage** — reported GPU voltage.
+- **PerfCap Reason** — NVIDIA performance-policy reason that currently limits additional boosting. This sensor is hardware-specific; see [perfcap-codes.md](perfcap-codes.md).
 
-At the bottom of this tab:
-
-- **Log to file** checkbox — writes sensor readings to a CSV over time (the GUI equivalent of the `-log` CLI flag).
-- Right-clicking a reading offers **Copy Value / Copy All**; each sensor can be switched to show highest / lowest / average reading.
+The **Log to file** option writes sensor samples to a CSV file. Sensor controls can expose current, minimum, maximum, or average display modes, depending on the GPU-Z version.
 
 ## Tab 3 — Advanced
 
-Deep, low-level technical detail for advanced troubleshooting and API/feature verification. Content is chosen from a **dropdown at the top of the tab**; it is read-only (GPU-Z does not edit these values).
+The Advanced tab provides read-only driver, firmware, operating-system, and graphics-API details selected from a dropdown. Available pages depend on the GPU, driver, Windows version, and GPU-Z version.
 
-Dropdown sections include:
+Common pages include:
 
-- **General** — driver details, including the graphics driver registry path, and features like **Resizable BAR** and **Hardware-Accelerated GPU Scheduling** status.
-- **BIOS** — VGA BIOS details and settings.
-- **WDDM** — Windows Display Driver Model version (e.g. WDDM 2.7+).
-- **DirectX** — feature levels and capabilities: Shader Model, DirectX Raytracing (DXR) tier, Mesh Shaders, per-version DX9/10/11/12 details.
-- **Vulkan** — supported Vulkan version, extensions, and device capabilities.
-- **OpenCL** — OpenCL platform/device capabilities.
-- **CUDA** — CUDA compute capability and features (NVIDIA).
-- **ASIC Quality** — leakage/quality estimate on supported cards.
+- **General** — device location, driver registry path, ECC status, and other adapter or driver details.
+- **BIOS** — VBIOS information.
+- **WDDM** — Windows Display Driver Model capabilities.
+- **DirectX** — feature levels, Shader Model, DirectX Raytracing, Mesh Shaders, and related capabilities.
+- **Vulkan / OpenCL / CUDA** — API versions, extensions, and device capabilities when supported.
+- **PCIe Resizable BAR** — Resizable BAR status and relevant requirements on supported systems.
 
-Use this tab to confirm the latest drivers are active and to check which API features the card exposes.
+Hardware-Accelerated GPU Scheduling and other Windows graphics capabilities may also appear in Advanced pages.
 
 ## Tab 4 — Validation
 
-Generates a unique **hash of your GPU configuration** for verification and sharing. Hashing happens locally; nothing is uploaded unless you explicitly submit it.
+The Validation tab submits the detected GPU configuration to TechPowerUp when the user chooses to submit it. A successful submission returns a validation ID and a web page that can be shared for comparison or troubleshooting.
 
-Uses:
+The submitted record reflects the configuration reported by the system at submission time. Validation entries are useful for sharing detected specifications and diagnostic context. The tab can also provide fields for bug-report submissions, depending on the GPU-Z version.
 
-- **Verify authenticity** — prove a card's real specs against TechPowerUp's database (useful when buying used, or for warranty claims with a timestamped screenshot).
-- **Share settings** — publish an overclock/config so owners of the same card can reference safe settings.
-- **Report bugs** — submit configuration data to the developers.
+## Settings
 
-## Settings Page
+The title-bar menu opens settings for GPU-Z behavior and sensor monitoring. Common controls include startup behavior, update checks, the initial tab, minimize behavior, sensor refresh rate, temperature units, background refresh, active sensors, display mode, and logging preferences.
 
-Opened from the small **menu / gear icon in the title bar** (top-right). It configures how GPU-Z itself behaves rather than showing GPU data. Typical options:
-
-- **General** — startup behavior (start minimized, minimize to tray, start with Windows), update checks, and window-on-top.
-- **Sensors** — the **refresh/polling interval** (e.g. every 1–2 s), which sensors are active/visible, continue-refreshing-while-in-background and while-minimized options, and default log file settings.
-- **ASIC Quality** — database submission options.
-- **About** — version number, credits, and links.
-
-For scripted/automated use, prefer the CLI flags in [cli-guide.md](cli-guide.md) over clicking through this page.
+ASIC Quality is a legacy reading available only on certain older GPU architectures and may not appear on modern cards.
